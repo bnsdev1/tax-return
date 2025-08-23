@@ -213,6 +213,9 @@ class Challan(Base):
     amount = Column(Numeric(15, 2), nullable=False)
     
     # Payment details
+    cin_crn = Column(String(16), nullable=False)  # CIN/CRN number
+    bsr_code = Column(String(7), nullable=False)  # BSR code
+    bank_reference = Column(String(50), nullable=False)  # Bank reference number
     bank_name = Column(String(100))
     branch_code = Column(String(20))
     payment_date = Column(DateTime)
@@ -221,6 +224,9 @@ class Challan(Base):
     # Tax period
     assessment_year = Column(String(7), nullable=False)
     quarter = Column(String(2))  # Q1, Q2, Q3, Q4 for advance tax
+    
+    # File storage
+    challan_file_path = Column(String(500))  # Path to uploaded challan PDF
     
     # Additional details
     remarks = Column(Text)

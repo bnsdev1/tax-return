@@ -1,0 +1,249 @@
+# Tax Rules for Assessment Year 2025-26
+# Income Tax Rules and Validations
+
+rules:
+  # Section 80C - Deductions
+  - code: "80C_CAP"
+    description: "Section 80C deduction should not exceed ₹1.5 lakh limit"
+    category: "deductions"
+    severity: "error"
+    expression: "deduction_80c <= 150000"
+    message_pass: "Section 80C deduction is within the ₹1.5 lakh limit"
+    message_fail: "Section 80C deduction exceeds the ₹1.5 lakh limit"
+    enabled: true
+
+  - code: "80C_POSITIVE"
+    description: "Section 80C deduction should be non-negative"
+    category: "deductions"
+    severity: "error"
+    expression: "deduction_80c >= 0"
+    message_pass: "Section 80C deduction is valid (non-negative)"
+    message_fail: "Section 80C deduction cannot be negative"
+    enabled: true
+
+  # Section 80D - Medical Insurance
+  - code: "80D_CAP_INDIVIDUAL"
+    description: "Section 80D deduction for individual should not exceed ₹25,000"
+    category: "deductions"
+    severity: "error"
+    expression: "deduction_80d_self <= 25000"
+    message_pass: "Section 80D (self) deduction is within the ₹25,000 limit"
+    message_fail: "Section 80D (self) deduction exceeds the ₹25,000 limit"
+    enabled: true
+
+  - code: "80D_CAP_PARENTS"
+    description: "Section 80D deduction for parents should not exceed ₹25,000 (₹50,000 if senior citizen)"
+    category: "deductions"
+    severity: "error"
+    expression: "deduction_80d_parents <= (50000 if parents_senior_citizen else 25000)"
+    message_pass: "Section 80D (parents) deduction is within the applicable limit"
+    message_fail: "Section 80D (parents) deduction exceeds the applicable limit"
+    enabled: true
+
+  - code: "80D_TOTAL_CAP"
+    description: "Total Section 80D deduction should not exceed ₹75,000"
+    category: "deductions"
+    severity: "error"
+    expression: "deduction_80d_self + deduction_80d_parents <= 75000"
+    message_pass: "Total Section 80D deduction is within the ₹75,000 limit"
+    message_fail: "Total Section 80D deduction exceeds the ₹75,000 limit"
+    enabled: true
+
+  # Section 80CCD(1B) - NPS Additional Deduction
+  - code: "80CCD1B_CAP"
+    description: "Section 80CCD(1B) NPS deduction should not exceed ₹50,000"
+    category: "deductions"
+    severity: "error"
+    expression: "deduction_80ccd1b <= 50000"
+    message_pass: "Section 80CCD(1B) deduction is within the ₹50,000 limit"
+    message_fail: "Section 80CCD(1B) deduction exceeds the ₹50,000 limit"
+    enabled: true
+
+  - code: "80CCD1B_POSITIVE"
+    description: "Section 80CCD(1B) deduction should be non-negative"
+    category: "deductions"
+    severity: "error"
+    expression: "deduction_80ccd1b >= 0"
+    message_pass: "Section 80CCD(1B) deduction is valid (non-negative)"
+    message_fail: "Section 80CCD(1B) deduction cannot be negative"
+    enabled: true
+
+  # Section 87A - Rebate
+  - code: "87A_ELIGIBILITY_NEW"
+    description: "Rebate 87A eligibility for new tax regime (income up to ₹7 lakh)"
+    category: "rebate"
+    severity: "info"
+    expression: "total_income <= 700000 and tax_regime == 'new'"
+    message_pass: "Eligible for rebate 87A under new tax regime"
+    message_fail: "Not eligible for rebate 87A under new tax regime (income exceeds ₹7 lakh)"
+    enabled: true
+
+  - code: "87A_ELIGIBILITY_OLD"
+    description: "Rebate 87A eligibility for old tax regime (income up to ₹5 lakh)"
+    category: "rebate"
+    severity: "info"
+    expression: "total_income <= 500000 and tax_regime == 'old'"
+    message_pass: "Eligible for rebate 87A under old tax regime"
+    message_fail: "Not eligible for rebate 87A under old tax regime (income exceeds ₹5 lakh)"
+    enabled: true
+
+  - code: "87A_AMOUNT_NEW"
+    description: "Rebate 87A amount should not exceed ₹25,000 (new regime)"
+    category: "rebate"
+    severity: "error"
+    expression: "rebate_87a <= 25000 or tax_regime != 'new'"
+    message_pass: "Rebate 87A amount is within the ₹25,000 limit (new regime)"
+    message_fail: "Rebate 87A amount exceeds the ₹25,000 limit (new regime)"
+    enabled: true
+
+  - code: "87A_AMOUNT_OLD"
+    description: "Rebate 87A amount should not exceed ₹12,500 (old regime)"
+    category: "rebate"
+    severity: "error"
+    expression: "rebate_87a <= 12500 or tax_regime != 'old'"
+    message_pass: "Rebate 87A amount is within the ₹12,500 limit (old regime)"
+    message_fail: "Rebate 87A amount exceeds the ₹12,500 limit (old regime)"
+    enabled: true
+
+  # Capital Gains - Section 112A (LTCG on Equity)
+  - code: "112A_EXEMPTION"
+    description: "LTCG on equity up to ₹1 lakh is exempt under section 112A"
+    category: "capital_gains"
+    severity: "info"
+    expression: "ltcg_equity <= 100000"
+    message_pass: "LTCG on equity is within the ₹1 lakh exemption limit"
+    message_fail: "LTCG on equity exceeds the ₹1 lakh exemption limit - tax applicable at 10%"
+    enabled: true
+
+  - code: "112A_TAX_RATE"
+    description: "LTCG on equity above ₹1 lakh should be taxed at 10%"
+    category: "capital_gains"
+    severity: "info"
+    expression: "ltcg_equity <= 100000 or abs(ltcg_tax_equity - (ltcg_equity - 100000) * 0.10) < 1"
+    message_pass: "LTCG tax on equity is correctly calculated at 10%"
+    message_fail: "LTCG tax on equity calculation appears incorrect"
+    enabled: true
+
+  # Capital Gains - Section 111A (STCG on Equity)
+  - code: "111A_TAX_RATE"
+    description: "STCG on equity should be taxed at 15%"
+    category: "capital_gains"
+    severity: "info"
+    expression: "stcg_equity == 0 or abs(stcg_tax_equity - stcg_equity * 0.15) < 1"
+    message_pass: "STCG tax on equity is correctly calculated at 15%"
+    message_fail: "STCG tax on equity calculation appears incorrect"
+    enabled: true
+
+  # House Property - Interest Deduction Cap
+  - code: "HP_INTEREST_SELF_OCCUPIED"
+    description: "Interest on home loan for self-occupied property should not exceed ₹2 lakh"
+    category: "house_property"
+    severity: "error"
+    expression: "hp_interest_self_occupied <= 200000"
+    message_pass: "Home loan interest for self-occupied property is within the ₹2 lakh limit"
+    message_fail: "Home loan interest for self-occupied property exceeds the ₹2 lakh limit"
+    enabled: true
+
+  - code: "HP_INTEREST_POSITIVE"
+    description: "House property interest should be non-negative"
+    category: "house_property"
+    severity: "error"
+    expression: "hp_interest_self_occupied >= 0"
+    message_pass: "House property interest is valid (non-negative)"
+    message_fail: "House property interest cannot be negative"
+    enabled: true
+
+  # Income Validation Rules
+  - code: "SALARY_POSITIVE"
+    description: "Salary income should be non-negative"
+    category: "income"
+    severity: "error"
+    expression: "salary_income >= 0"
+    message_pass: "Salary income is valid (non-negative)"
+    message_fail: "Salary income cannot be negative"
+    enabled: true
+
+  - code: "BUSINESS_INCOME_VALIDATION"
+    description: "Business income can be negative (loss) but should be reasonable"
+    category: "income"
+    severity: "warning"
+    expression: "business_income >= -10000000"  # -1 crore limit for reasonableness
+    message_pass: "Business income/loss appears reasonable"
+    message_fail: "Business loss appears unusually high - please verify"
+    enabled: true
+
+  - code: "TOTAL_INCOME_POSITIVE"
+    description: "Total income after all adjustments should be non-negative"
+    category: "income"
+    severity: "error"
+    expression: "total_income >= 0"
+    message_pass: "Total income is valid (non-negative)"
+    message_fail: "Total income cannot be negative after all adjustments"
+    enabled: true
+
+  # Tax Calculation Validation
+  - code: "TAX_LIABILITY_REASONABLE"
+    description: "Tax liability should be reasonable compared to income"
+    category: "tax"
+    severity: "warning"
+    expression: "total_income == 0 or tax_liability / max(total_income, 1) <= 0.45"  # Max ~45% effective rate
+    message_pass: "Tax liability appears reasonable relative to income"
+    message_fail: "Tax liability appears unusually high - please verify calculations"
+    enabled: true
+
+  - code: "ADVANCE_TAX_REASONABLE"
+    description: "Advance tax paid should not exceed total tax liability significantly"
+    category: "tax"
+    severity: "warning"
+    expression: "advance_tax_paid <= tax_liability * 1.1"  # Allow 10% buffer
+    message_pass: "Advance tax paid appears reasonable"
+    message_fail: "Advance tax paid significantly exceeds tax liability"
+    enabled: true
+
+  # TDS Validation
+  - code: "TDS_REASONABLE"
+    description: "TDS should not exceed total income (basic sanity check)"
+    category: "tds"
+    severity: "error"
+    expression: "tds_total <= total_income"
+    message_pass: "TDS amount appears reasonable"
+    message_fail: "TDS exceeds total income - please verify TDS certificates"
+    enabled: true
+
+  - code: "TDS_POSITIVE"
+    description: "TDS should be non-negative"
+    category: "tds"
+    severity: "error"
+    expression: "tds_total >= 0"
+    message_pass: "TDS amount is valid (non-negative)"
+    message_fail: "TDS amount cannot be negative"
+    enabled: true
+
+  # Refund/Payable Validation
+  - code: "REFUND_CALCULATION"
+    description: "Refund calculation should be correct"
+    category: "refund"
+    severity: "info"
+    expression: "tds_total + advance_tax_paid > tax_liability"
+    message_pass: "Refund due - taxes paid exceed liability"
+    message_fail: "Additional tax payable - liability exceeds taxes paid"
+    enabled: true
+
+  # Age-based Validations
+  - code: "SENIOR_CITIZEN_BENEFITS"
+    description: "Senior citizen should get higher basic exemption limit"
+    category: "age"
+    severity: "info"
+    expression: "not is_senior_citizen or basic_exemption >= 300000"
+    message_pass: "Senior citizen exemption limit correctly applied"
+    message_fail: "Senior citizen should get higher basic exemption (₹3 lakh)"
+    enabled: true
+
+  - code: "SUPER_SENIOR_CITIZEN_BENEFITS"
+    description: "Super senior citizen should get highest basic exemption limit"
+    category: "age"
+    severity: "info"
+    expression: "not is_super_senior_citizen or basic_exemption >= 500000"
+    message_pass: "Super senior citizen exemption limit correctly applied"
+    message_fail: "Super senior citizen should get highest basic exemption (₹5 lakh)"
+    enabled: true

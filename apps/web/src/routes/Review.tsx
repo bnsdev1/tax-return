@@ -297,18 +297,34 @@ export function Review() {
             {submitConfirmationsMutation.isPending ? 'Saving...' : 'Save Confirmations'}
           </button>
           
-          <button
-            onClick={handleContinue}
-            disabled={!canProceed}
-            className={`px-6 py-3 rounded-lg flex items-center ${
-              canProceed
-                ? 'bg-green-600 text-white hover:bg-green-700'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
-          >
-            Continue
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </button>
+          {/* Show Tax Payment button if there's payable amount */}
+          {(preview.summary.net_tax_payable || 0) > 0 ? (
+            <button
+              onClick={() => navigate(`/tax-payment/${returnId}`)}
+              disabled={!canProceed}
+              className={`px-6 py-3 rounded-lg flex items-center ${
+                canProceed
+                  ? 'bg-orange-600 text-white hover:bg-orange-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              Pay Tax (₹{(preview.summary.net_tax_payable || 0).toLocaleString()})
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </button>
+          ) : (
+            <button
+              onClick={handleContinue}
+              disabled={!canProceed}
+              className={`px-6 py-3 rounded-lg flex items-center ${
+                canProceed
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              Continue
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </button>
+          )}
         </div>
 
         {!canProceed && (

@@ -156,7 +156,10 @@ class TaxSummary(BaseModel):
     total_deductions: float = Field(..., description="Total deductions", example=0.0)
     taxable_income: float = Field(..., description="Taxable income", example=1245000.0)
     tax_liability: float = Field(..., description="Tax liability", example=78000.0)
+    total_taxes_paid: float = Field(..., description="Total taxes paid (TDS + Advance Tax + Challan)", example=104500.0)
     refund_or_payable: float = Field(..., description="Refund or payable amount", example=-26500.0)
+    net_tax_payable: float = Field(..., description="Net tax payable (positive if payment needed)", example=0.0)
+    challan_payments: float = Field(..., description="Total challan payments made", example=0.0)
 
 
 class KeyLines(BaseModel):

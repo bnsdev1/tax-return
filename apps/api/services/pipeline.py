@@ -108,7 +108,10 @@ class PreviewResponse:
             'total_deductions': computed_totals.get('total_deductions', 0),
             'taxable_income': computed_totals.get('taxable_income', 0),
             'tax_liability': computed_totals.get('total_tax_liability', 0),
-            'refund_or_payable': computed_totals.get('refund_or_payable', 0)
+            'total_taxes_paid': computed_totals.get('total_taxes_paid', 0),
+            'refund_or_payable': computed_totals.get('refund_or_payable', 0),
+            'net_tax_payable': max(0, computed_totals.get('refund_or_payable', 0)),
+            'challan_payments': 0  # Will be updated by the router
         }
     
     def _extract_warnings_blockers(self):
