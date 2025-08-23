@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import returns, artifacts, review, challan, rules
+from routers import returns, artifacts, review, challan, rules, export, settings_llm
 
 app = FastAPI(title="Tax Return Processing API", version="1.0.0")
 
@@ -19,6 +19,8 @@ app.include_router(artifacts.router)
 app.include_router(review.router)
 app.include_router(challan.router)
 app.include_router(rules.router)
+app.include_router(export.router)
+app.include_router(settings_llm.router)
 
 
 @app.get("/")

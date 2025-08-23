@@ -241,3 +241,36 @@ class Challan(Base):
     
     def __repr__(self) -> str:
         return f"<Challan(id={self.id}, number='{self.challan_number}', amount={self.amount}, status='{self.status}')>"
+
+
+class LLMSettingsModel(Base):
+    """LLM settings model for AI configuration."""
+    
+    __tablename__ = "llm_settings"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    
+    # Core settings
+    llm_enabled = Column(Boolean, default=True, nullable=False)
+    cloud_allowed = Column(Boolean, default=True, nullable=False)
+    
+    # Provider configuration
+    primary = Column(String(20), default="openai", nullable=False)
+    long_context_provider = Column(String(20), default="gemini", nullable=False)
+    local_provider = Column(String(20), default="ollama", nullable=False)
+    
+    # Privacy and processing settings
+    redact_pii = Column(Boolean, default=True, nullable=False)
+    long_context_threshold_chars = Column(Integer, default=8000, nullable=False)
+    confidence_threshold = Column(Numeric(3, 2), default=0.7, nullable=False)
+    
+    # Performance settings
+    max_retries = Column(Integer, default=2, nullable=False)
+    timeout_ms = Column(Integer, default=40000, nullable=False)
+    
+    # Audit fields
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    def __repr__(self) -> str:
+        return f"<LLMSettings(id={self.id}, enabled={self.llm_enabled}, cloud={self.cloud_allowed})>"
