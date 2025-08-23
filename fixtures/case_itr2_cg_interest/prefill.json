@@ -1,0 +1,99 @@
+{
+  "personal_info": {
+    "pan": "XYZAB5678C",
+    "name": "PRIYA SINGH PATEL",
+    "date_of_birth": "1982-03-22",
+    "address": {
+      "line1": "456 Park Street",
+      "line2": "Bandra West",
+      "city": "Mumbai",
+      "state": "Maharashtra",
+      "pincode": "400050"
+    },
+    "mobile": "9123456789",
+    "email": "priya.patel@email.com"
+  },
+  "return_context": {
+    "assessment_year": "2025-26",
+    "form_type": "ITR2",
+    "regime": "old",
+    "filing_status": "individual",
+    "residential_status": "resident"
+  },
+  "income": {
+    "salary": {
+      "gross_salary": 1500000,
+      "allowances": 150000,
+      "perquisites": 25000,
+      "profit_in_lieu": 0,
+      "employer_details": [
+        {
+          "employer_name": "FINANCIAL SERVICES LTD",
+          "employer_tan": "FINA12345E",
+          "address": "BKC, Mumbai",
+          "gross_salary": 1200000,
+          "tds_deducted": 180000
+        },
+        {
+          "employer_name": "CONSULTING CORP",
+          "employer_tan": "CONS67890E", 
+          "address": "Andheri, Mumbai",
+          "gross_salary": 300000,
+          "tds_deducted": 35000
+        }
+      ]
+    },
+    "house_property": {
+      "annual_value": 0,
+      "property_tax": 0,
+      "interest_on_loan": 0
+    },
+    "capital_gains": {
+      "short_term": 75000,
+      "long_term": 175000,
+      "transactions": [
+        {
+          "scrip": "RELIANCE",
+          "buy_date": "2023-01-15",
+          "sell_date": "2024-11-20",
+          "buy_value": 500000,
+          "sell_value": 650000,
+          "gain_type": "long_term",
+          "gain_amount": 150000
+        },
+        {
+          "scrip": "TCS",
+          "buy_date": "2024-02-10",
+          "sell_date": "2024-08-15",
+          "buy_value": 200000,
+          "sell_value": 275000,
+          "gain_type": "short_term",
+          "gain_amount": 75000
+        }
+      ]
+    },
+    "other_sources": {
+      "interest_income": 43000,
+      "dividend_income": 15000,
+      "other_income": 5000
+    }
+  },
+  "deductions": {
+    "standard_deduction": 50000,
+    "section_80c": 150000,
+    "section_80d": 25000,
+    "section_80g": 10000,
+    "other_deductions": 15000
+  },
+  "taxes_paid": {
+    "tds": 215000,
+    "advance_tax": 45000,
+    "self_assessment": 0,
+    "tcs": 2000
+  },
+  "metadata": {
+    "source": "prefill",
+    "created_at": "2025-08-23T12:00:00Z",
+    "version": "1.0"
+  }
+}

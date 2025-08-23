@@ -1,0 +1,51 @@
+{
+  "computation_result": {
+    "gross_total_income": 852500,
+    "deductions": {
+      "standard_deduction": 50000,
+      "total_deductions": 50000
+    },
+    "taxable_income": 802500,
+    "tax_calculation": {
+      "tax_on_total_income": 40125,
+      "cess": 1605,
+      "total_tax_liability": 41730
+    },
+    "taxes_paid": {
+      "tds": 45000,
+      "advance_tax": 0,
+      "self_assessment": 0,
+      "total_paid": 45000
+    },
+    "net_result": {
+      "refund_or_payable": -3270,
+      "status": "refund"
+    }
+  },
+  "reconciliation_summary": {
+    "salary_tds_match": true,
+    "interest_variance": 0,
+    "total_discrepancies": 0,
+    "confidence_score": 1.0
+  },
+  "validation_results": {
+    "schema_valid": true,
+    "business_rules_passed": 20,
+    "business_rules_failed": 0,
+    "warnings": [],
+    "blockers": []
+  },
+  "export_validation": {
+    "json_schema_valid": true,
+    "required_fields_present": true,
+    "amount_totals_match": true,
+    "date_formats_valid": true
+  },
+  "metadata": {
+    "test_case": "itr1_salary_only",
+    "expected_form": "ITR1",
+    "expected_regime": "new",
+    "processing_time_ms": 1500,
+    "deterministic_parsing": true
+  }
+}

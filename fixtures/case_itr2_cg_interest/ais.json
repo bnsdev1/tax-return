@@ -1,0 +1,85 @@
+{
+  "statement_info": {
+    "pan": "XYZAB5678C",
+    "name": "PRIYA SINGH PATEL",
+    "assessment_year": "2025-26",
+    "generated_on": "2025-05-15",
+    "statement_type": "AIS"
+  },
+  "salary_details": [
+    {
+      "employer_name": "FINANCIAL SERVICES LTD",
+      "employer_tan": "FINA12345E",
+      "gross_salary": 1200000,
+      "tds_deducted": 180000,
+      "period_from": "2024-04-01",
+      "period_to": "2025-03-31"
+    },
+    {
+      "employer_name": "CONSULTING CORP",
+      "employer_tan": "CONS67890E",
+      "gross_salary": 300000,
+      "tds_deducted": 35000,
+      "period_from": "2024-04-01",
+      "period_to": "2024-12-31"
+    }
+  ],
+  "interest_details": [
+    {
+      "bank_name": "HDFC BANK LTD",
+      "account_number": "****5678",
+      "interest_amount": 25000,
+      "tds_deducted": 2500,
+      "period_from": "2024-04-01",
+      "period_to": "2025-03-31"
+    },
+    {
+      "bank_name": "ICICI BANK LTD",
+      "account_number": "****9012",
+      "interest_amount": 18000,
+      "tds_deducted": 1800,
+      "period_from": "2024-04-01",
+      "period_to": "2025-03-31"
+    }
+  ],
+  "dividend_details": [
+    {
+      "company_name": "INFOSYS LTD",
+      "dividend_amount": 15000,
+      "tds_deducted": 1500,
+      "record_date": "2024-07-15"
+    }
+  ],
+  "capital_gains": [
+    {
+      "broker_name": "ZERODHA BROKING LTD",
+      "transaction_type": "equity",
+      "gain_amount": 225000,
+      "gain_type": "mixed",
+      "period_from": "2024-04-01",
+      "period_to": "2025-03-31"
+    }
+  ],
+  "other_income": [
+    {
+      "source": "FREELANCE INCOME",
+      "amount": 5000,
+      "tds_deducted": 500,
+      "payer_tan": "FREE12345E"
+    }
+  ],
+  "summary": {
+    "total_salary": 1500000,
+    "total_interest": 43000,
+    "total_dividend": 15000,
+    "total_capital_gains": 225000,
+    "total_other_income": 5000,
+    "total_tds": 220800,
+    "total_tcs": 2000
+  },
+  "metadata": {
+    "source": "ais",
+    "confidence": 1.0,
+    "parsed_at": "2025-08-23T12:00:00Z"
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "computation_result": {
+    "gross_total_income": 1788000,
+    "income_breakdown": {
+      "salary": 1500000,
+      "house_property": 0,
+      "capital_gains": {
+        "short_term": 75000,
+        "long_term": 175000,
+        "total": 250000
+      },
+      "other_sources": {
+        "interest": 43000,
+        "dividend": 15000,
+        "other": 5000,
+        "total": 63000
+      }
+    },
+    "deductions": {
+      "standard_deduction": 50000,
+      "section_80c": 150000,
+      "section_80d": 25000,
+      "section_80g": 10000,
+      "other_deductions": 15000,
+      "total_deductions": 250000
+    },
+    "taxable_income": 1538000,
+    "tax_calculation": {
+      "tax_on_salary_other": 153800,
+      "tax_on_ltcg": 17500,
+      "tax_on_stcg": 11250,
+      "total_tax_before_cess": 182550,
+      "cess": 7302,
+      "total_tax_liability": 189852
+    },
+    "taxes_paid": {
+      "tds_salary": 215000,
+      "tds_others": 6300,
+      "tcs": 2000,
+      "advance_tax": 45000,
+      "total_paid": 268300
+    },
+    "net_result": {
+      "refund_or_payable": -78448,
+      "status": "refund"
+    }
+  },
+  "reconciliation_summary": {
+    "variances_detected": [
+      {
+        "field": "interest_income",
+        "ais_amount": 43000,
+        "bank_amount": 45000,
+        "variance": 2000,
+        "requires_confirmation": true,
+        "severity": "medium"
+      }
+    ],
+    "salary_tds_match": true,
+    "capital_gains_variance": 35050,
+    "total_discrepancies": 2,
+    "confidence_score": 0.85,
+    "needs_confirmation": true
+  },
+  "validation_results": {
+    "schema_valid": true,
+    "business_rules_passed": 18,
+    "business_rules_failed": 2,
+    "warnings": [
+      "Interest income variance detected: AIS (₹43,000) vs Bank (₹45,000)",
+      "Capital gains variance: Broker P&L (₹285,050) vs AIS (₹250,000)"
+    ],
+    "blockers": [],
+    "rules_applied": [
+      {"rule": "pan_format_validation", "status": "pass"},
+      {"rule": "salary_tds_consistency", "status": "pass"},
+      {"rule": "interest_income_threshold", "status": "pass"},
+      {"rule": "capital_gains_computation", "status": "pass"},
+      {"rule": "deduction_limits_80c", "status": "pass"},
+      {"rule": "deduction_limits_80d", "status": "pass"},
+      {"rule": "advance_tax_minimum", "status": "pass"},
+      {"rule": "tds_credit_validation", "status": "pass"},
+      {"rule": "form_type_eligibility", "status": "pass"},
+      {"rule": "residential_status_check", "status": "pass"},
+      {"rule": "income_source_validation", "status": "pass"},
+      {"rule": "tax_regime_consistency", "status": "pass"},
+      {"rule": "challan_date_validation", "status": "pass"},
+      {"rule": "bsr_code_format", "status": "pass"},
+      {"rule": "employer_tan_validation", "status": "pass"},
+      {"rule": "dividend_exemption_limit", "status": "pass"},
+      {"rule": "ltcg_exemption_threshold", "status": "pass"},
+      {"rule": "stcg_tax_rate_validation", "status": "pass"},
+      {"rule": "interest_variance_threshold", "status": "fail", "message": "Variance exceeds ₹1,000 limit"},
+      {"rule": "capital_gains_reconciliation", "status": "fail", "message": "Broker vs AIS variance > 10%"}
+    ]
+  },
+  "export_validation": {
+    "json_schema_valid": true,
+    "required_fields_present": true,
+    "amount_totals_match": true,
+    "date_formats_valid": true,
+    "cross_references_valid": true
+  },
+  "payment_workflow": {
+    "net_payable": 0,
+    "challan_required": false,
+    "advance_tax_sufficient": true,
+    "refund_expected": 78448
+  },
+  "metadata": {
+    "test_case": "itr2_cg_interest",
+    "expected_form": "ITR2",
+    "expected_regime": "old",
+    "processing_time_ms": 3500,
+    "deterministic_parsing": false,
+    "llm_fallback_used": true,
+    "confirmation_required": true
+  }
+}

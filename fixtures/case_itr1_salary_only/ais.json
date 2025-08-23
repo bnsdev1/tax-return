@@ -1,0 +1,45 @@
+{
+  "statement_info": {
+    "pan": "ABCDE1234F",
+    "name": "RAJESH KUMAR SHARMA",
+    "assessment_year": "2025-26",
+    "generated_on": "2025-05-15",
+    "statement_type": "AIS"
+  },
+  "salary_details": [
+    {
+      "employer_name": "TECH SOLUTIONS PVT LTD",
+      "employer_tan": "ABCD12345E",
+      "gross_salary": 850000,
+      "tds_deducted": 45000,
+      "period_from": "2024-04-01",
+      "period_to": "2025-03-31"
+    }
+  ],
+  "interest_details": [
+    {
+      "bank_name": "STATE BANK OF INDIA",
+      "account_number": "****1234",
+      "interest_amount": 2500,
+      "tds_deducted": 0,
+      "period_from": "2024-04-01",
+      "period_to": "2025-03-31"
+    }
+  ],
+  "dividend_details": [],
+  "capital_gains": [],
+  "other_income": [],
+  "summary": {
+    "total_salary": 850000,
+    "total_interest": 2500,
+    "total_dividend": 0,
+    "total_capital_gains": 0,
+    "total_tds": 45000,
+    "total_tcs": 0
+  },
+  "metadata": {
+    "source": "ais",
+    "confidence": 1.0,
+    "parsed_at": "2025-08-23T12:00:00Z"
+  }
+}
