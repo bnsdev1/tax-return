@@ -4,6 +4,9 @@ import logging
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
+from datetime import date
+
+from .tax import TaxEngine, create_tax_engine
 
 logger = logging.getLogger(__name__)
 
@@ -20,40 +23,15 @@ class ComputationResult:
 
 
 class TaxCalculator:
-    """Calculates tax liability and totals from reconciled data."""
+    """Calculates tax liability and totals from reconciled data using the comprehensive tax engine."""
     
     def __init__(self, assessment_year: str = "2025-26", regime: str = "new"):
         self.assessment_year = assessment_year
         self.regime = regime
-        self._load_tax_slabs()
+        self.tax_engine = create_tax_engine(assessment_year)
+        logger.info(f"Initialized TaxCalculator for AY {assessment_year} ({regime} regime)")
     
-    def _load_tax_slabs(self):
-        """Load tax slabs based on assessment year and regime."""
-        if self.regime == "new":
-            # New tax regime slabs for 2025-26
-            self.tax_slabs = [
-                (300000, 0.0),    # Up to 3L - 0%
-                (700000, 0.05),   # 3L to 7L - 5%
-                (1000000, 0.10),  # 7L to 10L - 10%
-                (1200000, 0.15),  # 10L to 12L - 15%
-                (1500000, 0.20),  # 12L to 15L - 20%
-                (float('inf'), 0.30)  # Above 15L - 30%
-            ]
-            self.standard_deduction = 75000  # New regime standard deduction
-        else:
-            # Old tax regime slabs
-            self.tax_slabs = [
-                (250000, 0.0),    # Up to 2.5L - 0%
-                (500000, 0.05),   # 2.5L to 5L - 5%
-                (1000000, 0.20),  # 5L to 10L - 20%
-                (float('inf'), 0.30)  # Above 10L - 30%
-            ]
-            self.standard_deduction = 50000  # Old regime standard deduction
-        
-        # Common parameters
-        self.cess_rate = 0.04  # 4% Health and Education Cess
-        self.surcharge_threshold = 5000000  # 50L for surcharge
-        self.surcharge_rate = 0.10  # 10% surcharge above 50L
+
     
     def compute_totals(self, reconciled_data: Dict[str, Any]) -> ComputationResult:
         """Compute tax totals and liability from reconciled data.
@@ -89,15 +67,54 @@ class TaxCalculator:
         # Calculate taxable income
         taxable_income = max(Decimal('0'), gross_total_income - total_deductions)
         
-        # Calculate tax liability
-        tax_liability = self._calculate_tax_liability(taxable_income, warnings)
+        # Calculate tax liability using the comprehensive tax engine
+        tax_computation = self.tax_engine.compute_tax(
+            total_income=taxable_income,
+            regime=self.regime,
+            advance_tax_paid=Decimal(str(reconciled_data.get('advance_tax', 0))),
+            tds_deducted=Decimal(str(reconciled_data.get('tds', {}).get('total_tds', 0))),
+            filing_date=None,  # Would be provided in real scenario
+            taxpayer_age=35    # Default age, would be from taxpayer data
+        )
         
-        # Compute refund/payable
-        taxes_paid = Decimal(str(reconciled_data.get('tds', {}).get('total_tds', 0)))
-        advance_tax = Decimal(str(reconciled_data.get('advance_tax', 0)))  # From prefill or other sources
-        total_taxes_paid = taxes_paid + advance_tax
+        # Convert tax computation to legacy format
+        tax_liability = {
+            'base_tax': float(tax_computation.tax_before_rebate),
+            'rebate_87a': float(tax_computation.rebate_87a),
+            'tax_after_rebate': float(tax_computation.tax_after_rebate),
+            'surcharge': float(tax_computation.surcharge),
+            'cess': float(tax_computation.cess),
+            'total_tax_liability': float(tax_computation.total_tax_liability),
+            'interest_234a': float(tax_computation.interest_234a),
+            'interest_234b': float(tax_computation.interest_234b),
+            'interest_234c': float(tax_computation.interest_234c),
+            'total_interest': float(tax_computation.total_interest),
+            'total_payable': float(tax_computation.total_payable),
+            'effective_rate': self.tax_engine.get_effective_tax_rate(tax_computation),
+            'marginal_rate': self.tax_engine.get_marginal_tax_rate(taxable_income, self.regime),
+            'slab_wise_breakdown': tax_computation.slab_wise_tax,
+            'interest_details': [
+                {
+                    'section': detail.section,
+                    'principal_amount': float(detail.principal_amount),
+                    'rate': float(detail.rate),
+                    'months': detail.months,
+                    'interest_amount': float(detail.interest_amount),
+                    'description': detail.description
+                }
+                for detail in tax_computation.interest_details
+            ]
+        }
         
-        refund_or_payable = Decimal(str(tax_liability['total_tax_liability'])) - total_taxes_paid
+        # Calculate net position using tax engine
+        net_position = self.tax_engine.calculate_net_position(
+            tax_computation,
+            advance_tax_paid=Decimal(str(reconciled_data.get('advance_tax', 0))),
+            tds_deducted=Decimal(str(reconciled_data.get('tds', {}).get('total_tds', 0))),
+            other_payments=Decimal('0')
+        )
+        
+        refund_or_payable = Decimal(str(net_position['net_amount']))
         
         # Prepare computed totals
         computed_totals = {
@@ -106,7 +123,7 @@ class TaxCalculator:
             'taxable_income': float(taxable_income),
             'tax_on_taxable_income': float(tax_liability['base_tax']),
             'total_tax_liability': float(tax_liability['total_tax_liability']),
-            'total_taxes_paid': float(total_taxes_paid),
+            'total_taxes_paid': float(net_position['total_payments']),
             'refund_or_payable': float(refund_or_payable),
             'income_breakdown': {
                 'salary': float(salary_income['net_salary']),
@@ -127,7 +144,9 @@ class TaxCalculator:
                 'assessment_year': self.assessment_year,
                 'tax_regime': self.regime,
                 'computation_timestamp': __import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),
-                'effective_tax_rate': float(Decimal(str(tax_liability['total_tax_liability'])) / taxable_income * 100) if taxable_income > 0 else 0.0
+                'effective_tax_rate': tax_liability['effective_rate'],
+                'marginal_tax_rate': tax_liability['marginal_rate'],
+                'net_position': net_position
             }
         )
     
@@ -235,67 +254,3 @@ class TaxCalculator:
                 'total_deductions': float(total_deductions)
             }
     
-    def _calculate_tax_liability(self, taxable_income: Decimal, warnings: List[str]) -> Dict[str, Any]:
-        """Calculate tax liability based on tax slabs."""
-        if taxable_income <= 0:
-            return {
-                'base_tax': 0.0,
-                'surcharge': 0.0,
-                'cess': 0.0,
-                'total_tax_liability': 0.0,
-                'effective_rate': 0.0,
-                'marginal_rate': 0.0
-            }
-        
-        # Ensure taxable_income is Decimal
-        taxable_income = Decimal(str(taxable_income))
-        
-        # Calculate base tax using slabs
-        base_tax = Decimal('0')
-        remaining_income = taxable_income
-        previous_limit = Decimal('0')
-        marginal_rate = 0.0
-        
-        for limit, rate in self.tax_slabs:
-            if remaining_income <= 0:
-                break
-            
-            limit_decimal = Decimal(str(limit))
-            taxable_in_slab = min(remaining_income, limit_decimal - previous_limit)
-            slab_tax = taxable_in_slab * Decimal(str(rate))
-            base_tax += slab_tax
-            
-            if taxable_in_slab > 0:
-                marginal_rate = rate
-            
-            remaining_income -= taxable_in_slab
-            previous_limit = limit_decimal
-        
-        # Calculate surcharge
-        surcharge = Decimal('0')
-        if taxable_income > self.surcharge_threshold:
-            surcharge = base_tax * Decimal(str(self.surcharge_rate))
-            warnings.append(f"Surcharge of {self.surcharge_rate*100}% applied on income above ₹{self.surcharge_threshold:,}")
-        
-        # Calculate cess
-        cess = (base_tax + surcharge) * Decimal(str(self.cess_rate))
-        
-        # Total tax liability
-        total_tax_liability = base_tax + surcharge + cess
-        
-        # Effective tax rate
-        effective_rate = float(total_tax_liability / taxable_income * 100) if taxable_income > 0 else 0.0
-        
-        return {
-            'base_tax': float(base_tax),
-            'surcharge': float(surcharge),
-            'cess': float(cess),
-            'total_tax_liability': float(total_tax_liability),
-            'effective_rate': round(effective_rate, 2),
-            'marginal_rate': marginal_rate * 100,
-            'tax_breakdown': {
-                'base_tax': float(base_tax),
-                'surcharge': float(surcharge),
-                'cess': float(cess)
-            }
-        }

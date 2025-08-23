@@ -1,0 +1,225 @@
+# Tax rates and parameters for Assessment Year 2025-26 (Financial Year 2024-25)
+
+assessment_year: "2025-26"
+financial_year: "2024-25"
+
+# Tax regimes
+regimes:
+  old:
+    name: "Old Tax Regime"
+    description: "Traditional tax regime with deductions"
+    slabs:
+      - min: 0
+        max: 250000
+        rate: 0.0
+        description: "Up to ₹2.5 lakh - Nil"
+      - min: 250000
+        max: 500000
+        rate: 0.05
+        description: "₹2.5 lakh to ₹5 lakh - 5%"
+      - min: 500000
+        max: 1000000
+        rate: 0.20
+        description: "₹5 lakh to ₹10 lakh - 20%"
+      - min: 1000000
+        max: null
+        rate: 0.30
+        description: "Above ₹10 lakh - 30%"
+    
+    # Standard deduction for salary income
+    standard_deduction:
+      salary: 50000
+      pension: 15000
+    
+    # Rebate under section 87A
+    rebate_87a:
+      eligible_income_limit: 500000
+      max_rebate: 12500
+      description: "Rebate for income up to ₹5 lakh"
+    
+    # Deductions available
+    deductions:
+      section_80c:
+        limit: 150000
+        description: "Life insurance, PPF, ELSS, etc."
+      section_80d:
+        limit: 25000
+        senior_citizen_limit: 50000
+        description: "Health insurance premium"
+      section_80g:
+        limit: null  # No fixed limit, depends on donation type
+        description: "Donations to charitable institutions"
+
+  new:
+    name: "New Tax Regime (115BAC)"
+    description: "Simplified tax regime without most deductions"
+    slabs:
+      - min: 0
+        max: 300000
+        rate: 0.0
+        description: "Up to ₹3 lakh - Nil"
+      - min: 300000
+        max: 600000
+        rate: 0.05
+        description: "₹3 lakh to ₹6 lakh - 5%"
+      - min: 600000
+        max: 900000
+        rate: 0.10
+        description: "₹6 lakh to ₹9 lakh - 10%"
+      - min: 900000
+        max: 1200000
+        rate: 0.15
+        description: "₹9 lakh to ₹12 lakh - 15%"
+      - min: 1200000
+        max: 1500000
+        rate: 0.20
+        description: "₹12 lakh to ₹15 lakh - 20%"
+      - min: 1500000
+        max: null
+        rate: 0.30
+        description: "Above ₹15 lakh - 30%"
+    
+    # Standard deduction for salary income (introduced in Budget 2023)
+    standard_deduction:
+      salary: 75000
+      pension: 15000
+    
+    # Rebate under section 87A (enhanced for new regime)
+    rebate_87a:
+      eligible_income_limit: 700000
+      max_rebate: 25000
+      description: "Enhanced rebate for income up to ₹7 lakh"
+    
+    # Limited deductions available
+    deductions:
+      # Most deductions not available in new regime
+      section_80ccd_2:
+        limit: null  # Employer contribution to NPS
+        description: "Employer contribution to NPS (no limit)"
+
+# Surcharge rates (applicable to both regimes)
+surcharge:
+  thresholds:
+    - min: 5000000
+      max: 10000000
+      rate: 0.10
+      description: "10% surcharge on income between ₹50 lakh to ₹1 crore"
+    - min: 10000000
+      max: 20000000
+      rate: 0.15
+      description: "15% surcharge on income between ₹1 crore to ₹2 crore"
+    - min: 20000000
+      max: 50000000
+      rate: 0.25
+      description: "25% surcharge on income between ₹2 crore to ₹5 crore"
+    - min: 50000000
+      max: null
+      rate: 0.37
+      description: "37% surcharge on income above ₹5 crore"
+  
+  # Marginal relief for surcharge
+  marginal_relief: true
+  description: "Marginal relief ensures net tax doesn't exceed income above threshold"
+
+# Health and Education Cess
+cess:
+  rate: 0.04
+  description: "4% Health and Education Cess on tax + surcharge"
+  applicable_on: "tax_plus_surcharge"
+
+# Interest under sections 234A, 234B, 234C
+interest:
+  section_234a:
+    rate: 0.01  # 1% per month or part thereof
+    description: "Interest for failure to pay advance tax"
+    applicable_when: "advance_tax_shortfall"
+    calculation_basis: "monthly"
+    
+  section_234b:
+    rate: 0.01  # 1% per month or part thereof
+    description: "Interest for deferment of advance tax"
+    applicable_when: "advance_tax_deferment"
+    calculation_basis: "monthly"
+    
+  section_234c:
+    rate: 0.01  # 1% per month or part thereof
+    description: "Interest for failure to pay advance tax installments"
+    applicable_when: "installment_default"
+    calculation_basis: "monthly"
+
+# Advance tax payment schedule
+advance_tax:
+  due_dates:
+    - date: "15-06"
+      percentage: 0.15
+      description: "15% by June 15"
+    - date: "15-09"
+      percentage: 0.45  # Cumulative 45%
+      description: "45% by September 15"
+    - date: "15-12"
+      percentage: 0.75  # Cumulative 75%
+      description: "75% by December 15"
+    - date: "15-03"
+      percentage: 1.00  # Cumulative 100%
+      description: "100% by March 15"
+  
+  minimum_liability: 10000
+  description: "Advance tax required if liability exceeds ₹10,000"
+
+# TDS rates for common income types
+tds_rates:
+  salary:
+    rate: "as_per_slab"
+    description: "TDS on salary as per applicable slab rates"
+  
+  interest:
+    savings_account:
+      threshold: 10000
+      rate: 0.10
+      description: "10% TDS if interest exceeds ₹10,000"
+    fixed_deposit:
+      threshold: 40000
+      rate: 0.10
+      description: "10% TDS if interest exceeds ₹40,000"
+  
+  rent:
+    threshold: 240000
+    rate: 0.10
+    description: "10% TDS if annual rent exceeds ₹2.4 lakh"
+
+# Form-specific parameters
+forms:
+  itr1:
+    eligible_income_sources:
+      - "salary"
+      - "pension"
+      - "interest"
+      - "other_sources"
+    income_limit: 5000000
+    description: "ITR-1 for salary earners with income up to ₹50 lakh"
+  
+  itr2:
+    eligible_income_sources:
+      - "salary"
+      - "house_property"
+      - "capital_gains"
+      - "other_sources"
+    description: "ITR-2 for individuals with capital gains or house property"
+
+# Special provisions
+special_provisions:
+  senior_citizen:
+    age_threshold: 60
+    basic_exemption_old: 300000
+    basic_exemption_new: 300000  # Same as regular in new regime
+    
+  super_senior_citizen:
+    age_threshold: 80
+    basic_exemption_old: 500000
+    basic_exemption_new: 300000  # Same as regular in new regime
+
+# Validation thresholds
+validation:
+  high_income_threshold: 10000000
+  tds_variance_threshold: 0.05  # 5% variance allowed
+  advance_tax_minimum_percentage: 0.90  # 90% of liability should be paid as advance tax
