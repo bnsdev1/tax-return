@@ -1,5 +1,6 @@
 """Tax returns API endpoints."""
 
+import logging
 from typing import List
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
@@ -11,11 +12,14 @@ from schemas.returns import (
     TaxReturnStatusResponse,
     TaxReturnStatus,
     ValidationResult,
+    PreviewResponse,
 )
 from schemas.jobs import BuildJobResponse, JobStatus, JobType
 from repo import TaxpayerRepository, TaxReturnRepository
-from services.jobs import JobService
+from services.pipeline import TaxReturnPipeline
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/api/returns",
@@ -195,52 +199,81 @@ async def get_tax_return(
 
 @router.post(
     "/{return_id}/build",
-    response_model=BuildJobResponse,
-    status_code=status.HTTP_202_ACCEPTED,
-    summary="Start build job for tax return",
-    description="Initiate the build process for a tax return. This includes validation, calculations, and document generation.",
+    response_model=PreviewResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Build tax return and generate preview",
+    description="Execute the complete tax return pipeline and return a preview with key financial highlights.",
     responses={
-        202: {
-            "description": "Build job started successfully",
+        200: {
+            "description": "Tax return built successfully with preview",
             "content": {
                 "application/json": {
                     "example": {
-                        "job_id": "job_1_build_return_20250823120000",
-                        "tax_return_id": 1,
-                        "job_type": "build_return",
-                        "status": "queued",
-                        "progress_percentage": 0,
-                        "current_step": "Initializing build process",
-                        "created_at": "2025-08-23T12:00:00Z",
-                        "started_at": None,
-                        "completed_at": None,
-                        "estimated_completion": None,
-                        "result": None,
-                        "error_message": None,
-                        "error_details": None,
-                        "metadata": {}
+                        "key_lines": {
+                            "savings_interest": {
+                                "amount": 45000.0,
+                                "tds_deducted": 4500.0,
+                                "bank_count": 2
+                            },
+                            "total_tds_tcs": {
+                                "total_tds": 89500.0,
+                                "salary_tds": 85000.0,
+                                "interest_tds": 4500.0,
+                                "property_tds": 0.0,
+                                "breakdown": {
+                                    "salary": 85000.0,
+                                    "interest": 4500.0,
+                                    "property": 0.0
+                                }
+                            },
+                            "advance_tax": {
+                                "amount": 15000.0,
+                                "total_taxes_paid": 104500.0
+                            },
+                            "capital_gains": {
+                                "short_term": 25000.0,
+                                "long_term": 50000.0,
+                                "total": 75000.0,
+                                "transaction_count": 5
+                            }
+                        },
+                        "summary": {
+                            "gross_total_income": 1320000.0,
+                            "total_deductions": 0.0,
+                            "taxable_income": 1245000.0,
+                            "tax_liability": 78000.0,
+                            "refund_or_payable": -26500.0
+                        },
+                        "warnings": [],
+                        "blockers": [],
+                        "metadata": {
+                            "generated_at": "2025-08-23T12:00:00Z",
+                            "pipeline_status": "completed",
+                            "total_warnings": 0,
+                            "total_blockers": 0
+                        }
                     }
                 }
             }
         },
         404: {"description": "Tax return not found"},
-        409: {"description": "Build job already in progress"}
+        500: {"description": "Pipeline execution failed"}
     }
 )
-async def start_build_job(
+async def build_tax_return(
     return_id: int,
     db: Session = Depends(get_db)
-) -> BuildJobResponse:
+) -> PreviewResponse:
     """
-    Start a build job for the tax return.
+    Build tax return and generate preview.
     
-    This endpoint initiates the complete build process for a tax return, which includes:
-    - Data validation
-    - Tax calculations
-    - Document generation (PDF, XML)
-    - Compliance checks
+    This endpoint executes the complete deterministic pipeline for a tax return:
+    1. Parse artifacts - Extract data from uploaded documents
+    2. Reconcile sources - Cross-reference data from multiple sources
+    3. Compute totals - Calculate tax liability and totals
+    4. Validate - Check compliance and business rules
     
-    The process runs asynchronously. Use the returned job_id to poll for status updates.
+    Returns a preview with key financial highlights and any warnings/blockers.
     
     - **return_id**: The unique identifier of the tax return to build
     """
@@ -254,35 +287,28 @@ async def start_build_job(
             detail=f"Tax return with ID {return_id} not found"
         )
     
-    # Check if build job is already running
-    job_service = JobService()
-    existing_job = job_service.get_active_build_job(return_id)
-    
-    if existing_job:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Build job already in progress for tax return {return_id}"
+    try:
+        # Execute pipeline
+        pipeline = TaxReturnPipeline(db, return_id)
+        preview = pipeline.execute()
+        
+        # Convert to API response format
+        preview_dict = preview.to_dict()
+        
+        return PreviewResponse(
+            key_lines=preview_dict["key_lines"],
+            summary=preview_dict["summary"],
+            warnings=preview_dict["warnings"],
+            blockers=preview_dict["blockers"],
+            metadata=preview_dict["metadata"]
         )
-    
-    # Start new build job
-    job = job_service.start_build_job(return_id)
-    
-    return BuildJobResponse(
-        job_id=job["job_id"],
-        tax_return_id=return_id,
-        job_type=JobType.BUILD_RETURN,
-        status=JobStatus.QUEUED,
-        progress_percentage=0,
-        current_step="Initializing build process",
-        created_at=datetime.utcnow(),
-        started_at=None,
-        completed_at=None,
-        estimated_completion=None,
-        result=None,
-        error_message=None,
-        error_details=None,
-        metadata=job.get("metadata", {})
-    )
+        
+    except Exception as e:
+        logger.error(f"Pipeline execution failed for return {return_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Pipeline execution failed: {str(e)}"
+        )
 
 
 @router.get(
@@ -351,9 +377,15 @@ async def get_tax_return_status(
             detail=f"Tax return with ID {return_id} not found"
         )
     
-    # Get job status
-    job_service = JobService()
-    job_status = job_service.get_return_status(return_id)
+    # Get job status (simplified for demo)
+    job_status = {
+        "status": "completed",
+        "progress_percentage": 100,
+        "current_step": "Ready",
+        "error_message": None,
+        "started_at": None,
+        "completed_at": None
+    }
     
     # Get validation results (simplified for skeleton)
     validations = [

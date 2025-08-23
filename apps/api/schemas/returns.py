@@ -1,7 +1,7 @@
 """Tax return schemas for API requests and responses."""
 
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Dict
 from pydantic import BaseModel, Field
 from enum import Enum
 
@@ -49,7 +49,7 @@ class TaxReturnCreate(BaseModel):
     )
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class TaxReturnResponse(BaseModel):
@@ -114,6 +114,94 @@ class TaxReturnStatusResponse(BaseModel):
     # Timestamps
     started_at: Optional[datetime] = Field(None, description="Processing start time")
     completed_at: Optional[datetime] = Field(None, description="Processing completion time")
+    
+    class Config:
+        from_attributes = True
+
+
+# Preview Response Schemas
+class SavingsInterest(BaseModel):
+    """Savings interest details."""
+    amount: float = Field(..., description="Total interest amount", example=45000.0)
+    tds_deducted: float = Field(..., description="TDS deducted on interest", example=4500.0)
+    bank_count: int = Field(..., description="Number of banks", example=2)
+
+
+class TotalTdsTcs(BaseModel):
+    """Total TDS/TCS details."""
+    total_tds: float = Field(..., description="Total TDS amount", example=89500.0)
+    salary_tds: float = Field(..., description="TDS on salary", example=85000.0)
+    interest_tds: float = Field(..., description="TDS on interest", example=4500.0)
+    property_tds: float = Field(..., description="TDS on property", example=0.0)
+    breakdown: Dict[str, float] = Field(..., description="TDS breakdown by category")
+
+
+class AdvanceTax(BaseModel):
+    """Advance tax details."""
+    amount: float = Field(..., description="Advance tax paid", example=15000.0)
+    total_taxes_paid: float = Field(..., description="Total taxes paid", example=104500.0)
+
+
+class CapitalGains(BaseModel):
+    """Capital gains details."""
+    short_term: float = Field(..., description="Short-term capital gains", example=25000.0)
+    long_term: float = Field(..., description="Long-term capital gains", example=50000.0)
+    total: float = Field(..., description="Total capital gains", example=75000.0)
+    transaction_count: int = Field(..., description="Number of transactions", example=5)
+
+
+class TaxSummary(BaseModel):
+    """Tax computation summary."""
+    gross_total_income: float = Field(..., description="Gross total income", example=1320000.0)
+    total_deductions: float = Field(..., description="Total deductions", example=0.0)
+    taxable_income: float = Field(..., description="Taxable income", example=1245000.0)
+    tax_liability: float = Field(..., description="Tax liability", example=78000.0)
+    refund_or_payable: float = Field(..., description="Refund or payable amount", example=-26500.0)
+
+
+class KeyLines(BaseModel):
+    """Key financial lines for preview."""
+    savings_interest: SavingsInterest
+    total_tds_tcs: TotalTdsTcs
+    advance_tax: AdvanceTax
+    capital_gains: CapitalGains
+
+
+class Warning(BaseModel):
+    """Warning or issue details."""
+    type: str = Field(..., description="Warning type", example="validation")
+    rule: Optional[str] = Field(None, description="Rule name", example="high_income_alert")
+    message: str = Field(..., description="Warning message", example="Very high income reported")
+    field: Optional[str] = Field(None, description="Field path", example="income.gross_total_income")
+    severity: str = Field(..., description="Severity level", example="warning")
+
+
+class Blocker(BaseModel):
+    """Blocker or error details."""
+    type: str = Field(..., description="Blocker type", example="validation")
+    rule: Optional[str] = Field(None, description="Rule name", example="pan_required")
+    message: str = Field(..., description="Blocker message", example="PAN number is required")
+    field: Optional[str] = Field(None, description="Field path", example="personal_info.pan")
+    severity: str = Field(..., description="Severity level", example="error")
+    suggested_fix: Optional[str] = Field(None, description="Suggested fix", example="Provide valid PAN number")
+
+
+class PreviewMetadata(BaseModel):
+    """Preview metadata."""
+    generated_at: str = Field(..., description="Generation timestamp")
+    pipeline_status: str = Field(..., description="Pipeline status", example="completed")
+    total_warnings: int = Field(..., description="Total warnings count", example=2)
+    total_blockers: int = Field(..., description="Total blockers count", example=0)
+
+
+class PreviewResponse(BaseModel):
+    """Preview response with key tax return highlights."""
+    
+    key_lines: KeyLines = Field(..., description="Key financial lines")
+    summary: TaxSummary = Field(..., description="Tax computation summary")
+    warnings: List[Warning] = Field(default_factory=list, description="List of warnings")
+    blockers: List[Blocker] = Field(default_factory=list, description="List of blockers")
+    metadata: PreviewMetadata = Field(..., description="Preview metadata")
     
     class Config:
         from_attributes = True

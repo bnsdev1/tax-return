@@ -4,6 +4,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Dashboard } from './routes/Dashboard';
 import { Documents } from './routes/Documents';
+import { Review } from './routes/Review';
 import { NotFound } from './routes/NotFound';
 
 // Create a client
@@ -25,6 +26,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/documents/:returnId" element={<Documents />} />
+              <Route path="/review/:returnId" element={<Review />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>

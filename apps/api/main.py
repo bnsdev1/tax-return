@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from routers import returns, artifacts, review
 
-app = FastAPI(title="FastAPI Monorepo", version="1.0.0")
+app = FastAPI(title="Tax Return Processing API", version="1.0.0")
 
 # Configure CORS
 app.add_middleware(
@@ -12,10 +13,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include routers
+app.include_router(returns.router)
+app.include_router(artifacts.router)
+app.include_router(review.router)
+
 
 @app.get("/")
 async def root():
-    return {"message": "Hello from FastAPI!"}
+    return {"message": "Tax Return Processing API"}
 
 
 @app.get("/health")

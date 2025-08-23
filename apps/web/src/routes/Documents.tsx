@@ -93,14 +93,22 @@ export function Documents() {
         
         {status.status === 'completed' && (
           <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
-            <div className="flex">
-              <CheckCircle className="h-5 w-5 text-green-400" />
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-green-800">Build Completed Successfully</h3>
-                <div className="mt-2 text-sm text-green-700">
-                  Your tax return has been processed and is ready for review.
+            <div className="flex items-center justify-between">
+              <div className="flex">
+                <CheckCircle className="h-5 w-5 text-green-400" />
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-green-800">Build Completed Successfully</h3>
+                  <div className="mt-2 text-sm text-green-700">
+                    Your tax return has been processed and is ready for review.
+                  </div>
                 </div>
               </div>
+              <button
+                onClick={() => navigate(`/review/${returnId}`)}
+                className="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+              >
+                Review & Confirm
+              </button>
             </div>
           </div>
         )}

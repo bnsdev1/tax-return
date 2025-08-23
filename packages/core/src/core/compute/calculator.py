@@ -74,30 +74,30 @@ class TaxCalculator:
         capital_gains_income = self._compute_capital_gains_income(reconciled_data, warnings)
         other_sources_income = self._compute_other_sources_income(reconciled_data, warnings)
         
-        # Calculate gross total income
-        gross_total_income = (
+        # Calculate gross total income (convert to Decimal for precision)
+        gross_total_income = Decimal(str(
             salary_income['net_salary'] +
             house_property_income['net_income'] +
             capital_gains_income['total_gains'] +
             other_sources_income['total_income']
-        )
+        ))
         
         # Compute deductions
         deductions_summary = self._compute_deductions(reconciled_data, warnings)
-        total_deductions = deductions_summary['total_deductions']
+        total_deductions = Decimal(str(deductions_summary['total_deductions']))
         
         # Calculate taxable income
-        taxable_income = max(0, gross_total_income - total_deductions)
+        taxable_income = max(Decimal('0'), gross_total_income - total_deductions)
         
         # Calculate tax liability
         tax_liability = self._calculate_tax_liability(taxable_income, warnings)
         
         # Compute refund/payable
-        taxes_paid = reconciled_data.get('tds', {}).get('total_tds', 0)
-        advance_tax = reconciled_data.get('advance_tax', 0)  # From prefill or other sources
+        taxes_paid = Decimal(str(reconciled_data.get('tds', {}).get('total_tds', 0)))
+        advance_tax = Decimal(str(reconciled_data.get('advance_tax', 0)))  # From prefill or other sources
         total_taxes_paid = taxes_paid + advance_tax
         
-        refund_or_payable = tax_liability['total_tax_liability'] - total_taxes_paid
+        refund_or_payable = Decimal(str(tax_liability['total_tax_liability'])) - total_taxes_paid
         
         # Prepare computed totals
         computed_totals = {
@@ -127,7 +127,7 @@ class TaxCalculator:
                 'assessment_year': self.assessment_year,
                 'tax_regime': self.regime,
                 'computation_timestamp': __import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),
-                'effective_tax_rate': float(tax_liability['total_tax_liability'] / taxable_income * 100) if taxable_income > 0 else 0.0
+                'effective_tax_rate': float(Decimal(str(tax_liability['total_tax_liability'])) / taxable_income * 100) if taxable_income > 0 else 0.0
             }
         )
     
@@ -247,6 +247,9 @@ class TaxCalculator:
                 'marginal_rate': 0.0
             }
         
+        # Ensure taxable_income is Decimal
+        taxable_income = Decimal(str(taxable_income))
+        
         # Calculate base tax using slabs
         base_tax = Decimal('0')
         remaining_income = taxable_income
@@ -257,7 +260,8 @@ class TaxCalculator:
             if remaining_income <= 0:
                 break
             
-            taxable_in_slab = min(remaining_income, Decimal(str(limit)) - previous_limit)
+            limit_decimal = Decimal(str(limit))
+            taxable_in_slab = min(remaining_income, limit_decimal - previous_limit)
             slab_tax = taxable_in_slab * Decimal(str(rate))
             base_tax += slab_tax
             
@@ -265,7 +269,7 @@ class TaxCalculator:
                 marginal_rate = rate
             
             remaining_income -= taxable_in_slab
-            previous_limit = Decimal(str(limit))
+            previous_limit = limit_decimal
         
         # Calculate surcharge
         surcharge = Decimal('0')
