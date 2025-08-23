@@ -40,7 +40,7 @@ export function Dashboard() {
     pan: '',
     assessment_year: '2025-26',
     form_type: 'ITR2',
-    regime: 'new' as const,
+    regime: 'new' as 'old' | 'new',
   });
 
   const createTaxReturnMutation = useCreateTaxReturn();

@@ -1,4 +1,4 @@
-import React from 'react';
+// React import not needed for JSX in modern React
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';

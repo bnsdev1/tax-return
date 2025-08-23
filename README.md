@@ -100,22 +100,42 @@ sequenceDiagram
 - **Python:** 3.11+
 - **Node.js:** 20+
 - **Git:** Latest version
-- **Optional:** Tesseract (OCR), Ollama (offline LLM), Rust toolchain (Tauri builds)
+- **Optional:** 
+  - `make` command (install via `winget install GnuWin32.Make` or use batch scripts)
+  - Tesseract (OCR): `winget install UB-Mannheim.TesseractOCR`
+  - Ollama (offline LLM): Download from https://ollama.ai
 - **Disk:** ≥1 GB free space
 - **Memory:** ≥8 GB recommended (for local LLM)
 
 ## Installation (Development)
 
-```bash
+```cmd
 git clone <repo>
 cd <repo>
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
-cd apps/web
+cd apps\web
 npm install
-cd ../..
-cp .env.sample .env.local
+cd ..\..
+copy .env.sample .env.local
+```
+
+**Start Development (Windows):**
+```cmd
+# Option 1: Use batch scripts directly
+scripts\build_server.bat --dev
+
+# Option 2: Manual start
+cd apps\api
+python main_packaged.py --dev --no-browser
+# In another terminal:
+cd apps\web
+npm run dev
+```
+
+**Start Development (with make - requires installation):**
+```bash
 make dev
 ```
 
@@ -163,26 +183,39 @@ DEBUG=true
 
 ## Packaging (Production Offline)
 
-### Option A: PyInstaller (Standalone Server)
+### PyInstaller (Standalone Executable)
 
+**Windows:**
+```cmd
+scripts\build_server.bat
+```
+
+**With make (if installed):**
 ```bash
 make build-server
 ```
 
 Creates `dist/TaxReturnProcessor.exe` - run the executable, serves UI at http://localhost:8000
 
-### Option B: Tauri (Desktop App)
-
-```bash
-make build-desktop
-```
-
-Generates installer that launches desktop app with embedded backend.
+**Note:** Tauri desktop app packaging is planned but not yet implemented. Current packaging creates a standalone server executable.
 
 ## Testing
 
 Unit tests for parsers, reconciliation, tax computation, rules engine, and JSON export. E2E tests with Playwright.
 
+**Windows:**
+```cmd
+cd packages\core
+python -m pytest tests\ -v
+cd ..\..
+cd apps\api
+python -m pytest tests\ -v
+cd ..\..
+cd apps\web
+npm test
+```
+
+**With make (if installed):**
 ```bash
 make test
 ```
@@ -195,6 +228,10 @@ make test
 
 | Issue | Quick Fix |
 |-------|-----------|
+| `make` command not found | Install: `winget install GnuWin32.Make` or use `scripts\build_server.bat` |
+| PyInstaller version error | Update pip: `python -m pip install --upgrade pip` |
+| Python dependencies fail | Use Python 3.11 (not 3.13), create fresh virtual environment |
+| Pydantic/Rust compilation errors | Install Rust: `winget install Rustlang.Rustup` or use Python 3.11 |
 | Schema validation errors | Check `logs/validation.log`, verify document formats |
 | Variance blockers | Review reconciliation page, confirm disputed amounts |
 | Missing OCR | Install Tesseract: `winget install UB-Mannheim.TesseractOCR` |

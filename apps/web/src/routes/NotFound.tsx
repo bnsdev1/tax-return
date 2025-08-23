@@ -1,4 +1,4 @@
-import React from 'react';
+// React import not needed for JSX in modern React
 import { useNavigate } from 'react-router-dom';
 import { Home, ArrowLeft } from 'lucide-react';
 

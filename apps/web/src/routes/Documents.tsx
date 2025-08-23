@@ -1,4 +1,4 @@
-import React from 'react';
+// React import not needed for JSX in modern React
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Play, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { ArtifactTile } from '../components/ArtifactTile';
@@ -24,7 +24,7 @@ export function Documents() {
 
   const { data: taxReturn, isLoading: isLoadingReturn } = useTaxReturn(returnIdNum);
   const { data: artifacts, isLoading: isLoadingArtifacts } = useArtifacts(returnIdNum);
-  const { data: status, isLoading: isLoadingStatus } = useTaxReturnStatus(returnIdNum);
+  const { data: status } = useTaxReturnStatus(returnIdNum);
   const startBuildMutation = useStartBuildJob();
 
   const handleStartBuild = async () => {

@@ -103,6 +103,10 @@ if not exist "venv" (
 REM Activate virtual environment
 call venv\Scripts\activate.bat
 
+REM Upgrade pip first
+echo Upgrading pip...
+python -m pip install --upgrade pip
+
 REM Install dependencies
 echo Installing Python dependencies...
 pip install -r requirements.txt

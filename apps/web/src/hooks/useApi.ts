@@ -21,9 +21,9 @@ export function useTaxReturnStatus(id: number, enabled = true) {
     queryKey: ['taxReturnStatus', id],
     queryFn: () => apiClient.getTaxReturnStatus(id),
     enabled: enabled && !!id,
-    refetchInterval: (data) => {
+    refetchInterval: (query) => {
       // Poll every 2 seconds if status is in progress
-      if (data?.status === 'in_progress') {
+      if (query.state.data?.status === 'in_progress') {
         return 2000;
       }
       return false;

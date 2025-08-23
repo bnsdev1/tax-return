@@ -2,11 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../lib/api';
-import type {
-  ReviewPreviewResponse,
-  ConfirmationRequest,
-  ConfirmationResponse,
-} from '../types/review';
+// Types are inferred from API client methods
 
 // Review Preview
 export function useReviewPreview(returnId: number) {

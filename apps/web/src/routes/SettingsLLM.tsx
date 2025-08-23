@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Switch } from '../components/ui/switch';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Badge } from '../components/ui/badge';
+import { Alert, AlertDescription } from '../components/ui/alert';
 import { Loader2, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 interface LLMSettings {
@@ -221,7 +221,7 @@ const SettingsLLM: React.FC = () => {
             <Switch
               id="llm-enabled"
               checked={settings.llm_enabled}
-              onCheckedChange={(checked) => updateSetting('llm_enabled', checked)}
+              onCheckedChange={(checked: boolean) => updateSetting('llm_enabled', checked)}
             />
             <Label htmlFor="llm-enabled">Enable LLM Processing</Label>
           </div>
@@ -230,7 +230,7 @@ const SettingsLLM: React.FC = () => {
             <Switch
               id="cloud-allowed"
               checked={settings.cloud_allowed}
-              onCheckedChange={(checked) => updateSetting('cloud_allowed', checked)}
+              onCheckedChange={(checked: boolean) => updateSetting('cloud_allowed', checked)}
               disabled={!settings.llm_enabled}
             />
             <Label htmlFor="cloud-allowed">Allow Cloud Providers</Label>
@@ -240,7 +240,7 @@ const SettingsLLM: React.FC = () => {
             <Switch
               id="redact-pii"
               checked={settings.redact_pii}
-              onCheckedChange={(checked) => updateSetting('redact_pii', checked)}
+              onCheckedChange={(checked: boolean) => updateSetting('redact_pii', checked)}
               disabled={!settings.llm_enabled || !settings.cloud_allowed}
             />
             <Label htmlFor="redact-pii">Redact PII for Cloud</Label>
@@ -259,7 +259,7 @@ const SettingsLLM: React.FC = () => {
               <Label htmlFor="primary-provider">Primary Provider</Label>
               <Select
                 value={settings.primary}
-                onValueChange={(value) => updateSetting('primary', value)}
+                onValueChange={(value: string) => updateSetting('primary', value)}
                 disabled={!settings.llm_enabled}
               >
                 <SelectTrigger>
@@ -279,7 +279,7 @@ const SettingsLLM: React.FC = () => {
               <Label htmlFor="long-context-provider">Long Context Provider</Label>
               <Select
                 value={settings.long_context_provider}
-                onValueChange={(value) => updateSetting('long_context_provider', value)}
+                onValueChange={(value: string) => updateSetting('long_context_provider', value)}
                 disabled={!settings.llm_enabled}
               >
                 <SelectTrigger>
@@ -299,7 +299,7 @@ const SettingsLLM: React.FC = () => {
               <Label htmlFor="local-provider">Local Provider</Label>
               <Select
                 value={settings.local_provider}
-                onValueChange={(value) => updateSetting('local_provider', value)}
+                onValueChange={(value: string) => updateSetting('local_provider', value)}
                 disabled={!settings.llm_enabled}
               >
                 <SelectTrigger>
@@ -390,7 +390,7 @@ const SettingsLLM: React.FC = () => {
                 id="long-context-threshold"
                 type="number"
                 value={settings.long_context_threshold_chars}
-                onChange={(e) => updateSetting('long_context_threshold_chars', parseInt(e.target.value))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateSetting('long_context_threshold_chars', parseInt(e.target.value))}
                 disabled={!settings.llm_enabled}
                 min="1000"
                 max="50000"
@@ -404,7 +404,7 @@ const SettingsLLM: React.FC = () => {
                 type="number"
                 step="0.1"
                 value={settings.confidence_threshold}
-                onChange={(e) => updateSetting('confidence_threshold', parseFloat(e.target.value))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateSetting('confidence_threshold', parseFloat(e.target.value))}
                 disabled={!settings.llm_enabled}
                 min="0"
                 max="1"
@@ -417,7 +417,7 @@ const SettingsLLM: React.FC = () => {
                 id="max-retries"
                 type="number"
                 value={settings.max_retries}
-                onChange={(e) => updateSetting('max_retries', parseInt(e.target.value))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateSetting('max_retries', parseInt(e.target.value))}
                 disabled={!settings.llm_enabled}
                 min="0"
                 max="5"
@@ -430,7 +430,7 @@ const SettingsLLM: React.FC = () => {
                 id="timeout"
                 type="number"
                 value={settings.timeout_ms}
-                onChange={(e) => updateSetting('timeout_ms', parseInt(e.target.value))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateSetting('timeout_ms', parseInt(e.target.value))}
                 disabled={!settings.llm_enabled}
                 min="1000"
                 max="120000"

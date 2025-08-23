@@ -5,7 +5,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { Dashboard } from './routes/Dashboard';
 import { Documents } from './routes/Documents';
 import { Review } from './routes/Review';
-import { TaxPayment } from './routes/TaxPayment';
+import TaxPayment from './routes/TaxPayment';
 import { NotFound } from './routes/NotFound';
 
 // Create a client
