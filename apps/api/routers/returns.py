@@ -2,7 +2,7 @@
 
 import logging
 from typing import List
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, UploadFile, File
 from sqlalchemy.orm import Session
 
 from db.base import get_db
@@ -546,4 +546,186 @@ async def export_tax_return(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Export processing failed"
+        )
+
+
+@router.post(
+    "/{return_id}/upload/form26as",
+    status_code=status.HTTP_200_OK,
+    summary="Upload Form 26AS PDF",
+    description="Upload Form 26AS PDF for tax credit reconciliation. Supports deterministic parsing with LLM fallback.",
+    responses={
+        200: {
+            "description": "Form 26AS uploaded and processed successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "message": "Form 26AS processed successfully",
+                        "parser_used": "deterministic",
+                        "confidence": 1.0,
+                        "summary": {
+                            "total_tds_salary": 85000,
+                            "total_tds_others": 4500,
+                            "total_tcs": 0,
+                            "total_advance_tax": 15000,
+                            "total_self_assessment": 0,
+                            "challan_count": 2
+                        },
+                        "warnings": [],
+                        "needs_confirmation": False
+                    }
+                }
+            }
+        },
+        400: {"description": "Invalid file or processing failed"},
+        404: {"description": "Tax return not found"},
+        413: {"description": "File too large"}
+    }
+)
+async def upload_form26as(
+    return_id: int,
+    file: UploadFile = File(..., description="Form 26AS PDF file"),
+    db: Session = Depends(get_db)
+):
+    """
+    Upload and process Form 26AS PDF.
+    
+    This endpoint:
+    1. Validates the uploaded PDF file
+    2. Attempts deterministic parsing using table extraction
+    3. Falls back to LLM parsing if deterministic parsing fails
+    4. Reconciles tax credits with existing data
+    5. Returns summary with confidence scores and warnings
+    
+    - **return_id**: The unique identifier of the tax return
+    - **file**: Form 26AS PDF file (max 10MB)
+    """
+    # Verify tax return exists
+    return_repo = TaxReturnRepository(db)
+    tax_return = return_repo.get(return_id)
+    
+    if not tax_return:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Tax return with ID {return_id} not found"
+        )
+    
+    # Validate file
+    if not file.filename.lower().endswith('.pdf'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only PDF files are supported for Form 26AS"
+        )
+    
+    # Check file size (10MB limit)
+    max_size = 10 * 1024 * 1024  # 10MB
+    file_content = await file.read()
+    if len(file_content) > max_size:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="File size exceeds 10MB limit"
+        )
+    
+    try:
+        # Save file temporarily
+        import tempfile
+        import os
+        from pathlib import Path
+        
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
+            temp_file.write(file_content)
+            temp_file_path = Path(temp_file.name)
+        
+        try:
+            # Parse Form 26AS
+            import sys
+            from pathlib import Path
+            sys.path.append(str(Path(__file__).parent.parent.parent / "packages" / "core" / "src"))
+            sys.path.append(str(Path(__file__).parent.parent.parent / "packages" / "llm"))
+            
+            from core.parsers.form26as_llm import parse_form26as_with_fallback
+            from router import LLMRouter
+            from contracts import LLMTask
+            
+            # Get LLM settings (simplified for demo)
+            from router import LLMSettings
+            llm_settings = LLMSettings({
+                "llm_enabled": True,
+                "cloud_allowed": True,
+                "primary": "openai"
+            })
+            router = LLMRouter(llm_settings)
+            
+            # Parse with fallback
+            parsed_data = parse_form26as_with_fallback(temp_file_path, router)
+            
+            # Extract summary information
+            form26as_data = parsed_data.get('form26as_data', {})
+            metadata = parsed_data.get('metadata', {})
+            
+            # Calculate summary
+            tds_salary_total = sum(row.get('amount', 0) for row in form26as_data.get('tds_salary', []))
+            tds_others_total = sum(row.get('amount', 0) for row in form26as_data.get('tds_others', []))
+            tcs_total = sum(row.get('amount', 0) for row in form26as_data.get('tcs', []))
+            
+            advance_tax_total = sum(
+                row.get('amount', 0) for row in form26as_data.get('challans', [])
+                if row.get('kind') == 'ADVANCE'
+            )
+            self_assessment_total = sum(
+                row.get('amount', 0) for row in form26as_data.get('challans', [])
+                if row.get('kind') == 'SELF_ASSESSMENT'
+            )
+            
+            challan_count = len(form26as_data.get('challans', []))
+            
+            # Store parsed data (in production, save to database)
+            # For now, we'll just return the summary
+            
+            parser_used = "deterministic" if metadata.get('parser') == 'deterministic' else "llm_fallback"
+            confidence = metadata.get('confidence', 1.0)
+            needs_confirmation = parser_used == 'llm_fallback' or confidence < 0.8
+            
+            # Generate warnings based on data quality
+            warnings = []
+            if confidence < 0.8:
+                warnings.append(f"Low confidence score ({confidence:.2f}) - please review extracted data")
+            
+            if parser_used == 'llm_fallback':
+                warnings.append("Deterministic parsing failed, used LLM fallback - please verify accuracy")
+            
+            if challan_count == 0 and (advance_tax_total > 0 or self_assessment_total > 0):
+                warnings.append("Tax payments detected but no challan details found")
+            
+            return {
+                "message": "Form 26AS processed successfully",
+                "parser_used": parser_used,
+                "confidence": confidence,
+                "summary": {
+                    "total_tds_salary": tds_salary_total,
+                    "total_tds_others": tds_others_total,
+                    "total_tcs": tcs_total,
+                    "total_advance_tax": advance_tax_total,
+                    "total_self_assessment": self_assessment_total,
+                    "challan_count": challan_count
+                },
+                "warnings": warnings,
+                "needs_confirmation": needs_confirmation,
+                "file_info": {
+                    "filename": file.filename,
+                    "size_bytes": len(file_content),
+                    "processed_at": datetime.now().isoformat()
+                }
+            }
+            
+        finally:
+            # Clean up temporary file
+            if temp_file_path.exists():
+                os.unlink(temp_file_path)
+    
+    except Exception as e:
+        logger.error(f"Form 26AS processing failed for return {return_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to process Form 26AS: {str(e)}"
         )

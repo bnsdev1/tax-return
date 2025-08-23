@@ -1,0 +1,30 @@
+# This is a placeholder for a clean Form 26AS PDF fixture
+# In a real implementation, this would be a binary PDF file
+# For testing purposes, this file represents a well-structured Form 26AS
+# that should be parsed successfully by the deterministic parser
+
+FORM 26AS - TAX CREDIT STATEMENT
+Assessment Year: 2025-26
+PAN: ABCDE1234F
+
+PART A - TDS ON SALARY
+TAN         DEDUCTOR NAME           SECTION  PERIOD FROM  PERIOD TO    AMOUNT
+ABCD12345E  ABC COMPANY LTD         192      01/04/2024   31/03/2025   85,000
+
+TOTAL TDS ON SALARY: ₹85,000
+
+PART B - TDS ON OTHER THAN SALARY  
+TAN         DEDUCTOR NAME           SECTION  PERIOD FROM  PERIOD TO    AMOUNT
+BANK12345E  XYZ BANK LTD           194A     01/04/2024   31/03/2025   4,500
+
+TOTAL TDS ON OTHER THAN SALARY: ₹4,500
+
+PART C - TCS COLLECTED
+No entries found
+
+PART D - ADVANCE TAX/SELF ASSESSMENT
+BSR CODE    CHALLAN NO      DATE PAID    AMOUNT
+1234567     123456789       15/06/2024   10,000
+1234567     987654321       15/09/2024   5,000
+
+TOTAL ADVANCE TAX: ₹15,000

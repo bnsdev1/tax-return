@@ -1,0 +1,29 @@
+# This is a placeholder for an odd/complex Form 26AS PDF fixture
+# In a real implementation, this would be a binary PDF file
+# This represents a Form 26AS with irregular formatting that would
+# trigger the LLM fallback parser
+
+Form 26AS Tax Credit Statement
+AY 2025-26 | PAN: ABCDE1234F
+
+Salary TDS Details:
+- Employer: ABC COMPANY LTD (TAN: ABCD12345E)
+  Period: Apr 2024 to Mar 2025
+  Section 192 TDS: Rs. 85,000/-
+
+Interest TDS:
+XYZ Bank Ltd deducted Rs 4,500 under section 194A
+Period: FY 2024-25
+
+Tax Payments Made:
+Advance Tax Payment 1:
+BSR: 1234567, Challan: 123456789
+Date: 15-Jun-2024, Amount: Rs 10,000
+
+Advance Tax Payment 2:  
+BSR: 1234567, Challan: 987654321
+Date: 15-Sep-2024, Amount: Rs 5,000
+
+Summary:
+Total TDS: Rs 89,500
+Total Advance Tax: Rs 15,000
