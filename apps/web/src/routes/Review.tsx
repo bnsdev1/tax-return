@@ -226,25 +226,25 @@ export function Review() {
         </div>
 
         {/* Tax Heads */}
-        <div className="space-y-8">
-          {Object.entries(preview.heads).map(([headKey, head]) => (
-            <TaxHeadSection
-              key={headKey}
-              head={head}
-              confirmations={confirmations}
-              edits={edits}
-              editingItem={editingItem}
-              editAmount={editAmount}
-              editReason={editReason}
-              onConfirmationToggle={handleConfirmationToggle}
-              onEditStart={handleEditStart}
-              onEditSave={handleEditSave}
-              onEditCancel={handleEditCancel}
-              onEditAmountChange={setEditAmount}
-              onEditReasonChange={setEditReason}
-            />
-          ))}
-        </div>
+          <div className="space-y-8">
+            {Object.entries(preview.heads).map(([headKey, head]: [string, TaxHead]) => (
+              <TaxHeadSection
+                key={headKey}
+                head={head}
+                confirmations={confirmations}
+                edits={edits}
+                editingItem={editingItem}
+                editAmount={editAmount}
+                editReason={editReason}
+                onConfirmationToggle={handleConfirmationToggle}
+                onEditStart={handleEditStart}
+                onEditSave={handleEditSave}
+                onEditCancel={handleEditCancel}
+                onEditAmountChange={setEditAmount}
+                onEditReasonChange={setEditReason}
+              />
+            ))}
+          </div>
 
         {/* Summary */}
         <div className="mt-8 bg-white rounded-lg shadow-sm border p-6">
