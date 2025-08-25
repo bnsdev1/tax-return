@@ -151,5 +151,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=str(current_dir / "icon.ico") if (current_dir / "icon.ico").exists() else None,
+    icon=None,
 )

@@ -16,9 +16,9 @@ from core.validate import TaxValidator
 # LLM imports
 from packages.llm.router import LLMRouter, LLMSettings
 from packages.llm.contracts import LLMTask
-from packages.core.src.core.parsers.form16b_llm import parse_form16b_llm, ParseMiss
-from packages.core.src.core.parsers.bank_classifier_llm import BankClassifier
-from packages.core.src.core.explain.rules_explainer_llm import RulesExplainer
+from core.parsers.form16b_llm import parse_form16b_llm, ParseMiss
+from core.parsers.bank_classifier_llm import BankClassifier
+from core.explain.rules_explainer_llm import RulesExplainer
 
 # API imports
 from repo import TaxReturnRepository, ArtifactRepository, LLMSettingsRepository

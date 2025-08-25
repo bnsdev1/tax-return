@@ -28,7 +28,7 @@ from .parsers import (
 )
 from .reconcile import DataReconciler, ReconciliationResult
 from .compute import TaxCalculator, ComputationResult
-# from .validate import TaxValidator, ValidationResult  # TODO: Implement these classes
+from .validate import TaxValidator, ValidationResult
 
 __version__ = "0.1.0"
 
@@ -55,4 +55,6 @@ __all__ = [
     "BankCSVParser",
     "PnLCSVParser",
     "default_registry",
+    "TaxValidator",
+    "ValidationResult",
 ]
