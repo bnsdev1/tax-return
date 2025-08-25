@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Play, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { ArtifactTile } from '../components/ArtifactTile';
 import { useTaxReturn, useTaxReturnStatus, useArtifacts, useStartBuildJob } from '../hooks/useApi';
+import type { ArtifactMetadata, ValidationResult } from '../types/api';
 
 const ARTIFACT_TYPES = [
   'prefill.json',
@@ -200,8 +201,9 @@ export function Documents() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {ARTIFACT_TYPES.map((artifactType) => {
                 const existingArtifact = artifacts?.find(
-                  (artifact) => artifact.name.includes(artifactType) || 
-                               (artifact as any).tags?.includes(artifactType)
+                  (artifact: ArtifactMetadata) =>
+                    artifact.name.includes(artifactType) ||
+                    (artifact as any).tags?.includes(artifactType)
                 );
                 
                 return (
@@ -222,7 +224,7 @@ export function Documents() {
           <div className="bg-white rounded-lg border border-gray-200 p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Validation Results</h3>
             <div className="space-y-3">
-              {status.validations.map((validation, index) => (
+              {status.validations.map((validation: ValidationResult, index: number) => (
                 <div key={index} className="flex items-start space-x-3">
                   {validation.status === 'passed' && (
                     <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />

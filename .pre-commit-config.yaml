@@ -14,7 +14,7 @@ repos:
         files: ^(apps/api|packages/core)/.*\.py$
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.0.287
+    rev: v0.1.1
     hooks:
       - id: ruff
         files: ^(apps/api|packages/core)/.*\.py$
@@ -26,7 +26,6 @@ repos:
     hooks:
       - id: mypy
         files: ^(apps/api|packages/core)/.*\.py$
-        additional_dependencies: [types-all]
 
   - repo: https://github.com/pre-commit/mirrors-eslint
     rev: v8.47.0
