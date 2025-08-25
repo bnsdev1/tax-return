@@ -5,11 +5,14 @@ import { apiClient } from '../lib/api';
 import type {
   CreateTaxReturnRequest,
   CreateArtifactRequest,
+  ArtifactMetadata,
+  TaxReturn,
+  TaxReturnStatus,
 } from '../types/api';
 
 // Tax Returns
 export function useTaxReturn(id: number) {
-  return useQuery({
+  return useQuery<TaxReturn>({
     queryKey: ['taxReturn', id],
     queryFn: () => apiClient.getTaxReturn(id),
     enabled: !!id,
@@ -17,7 +20,7 @@ export function useTaxReturn(id: number) {
 }
 
 export function useTaxReturnStatus(id: number, enabled = true) {
-  return useQuery({
+  return useQuery<TaxReturnStatus>({
     queryKey: ['taxReturnStatus', id],
     queryFn: () => apiClient.getTaxReturnStatus(id),
     enabled: enabled && !!id,
@@ -33,9 +36,9 @@ export function useTaxReturnStatus(id: number, enabled = true) {
 
 export function useCreateTaxReturn() {
   const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (data: CreateTaxReturnRequest) => apiClient.createTaxReturn(data),
+
+  return useMutation<TaxReturn, Error, CreateTaxReturnRequest>({
+    mutationFn: (data) => apiClient.createTaxReturn(data),
     onSuccess: () => {
       // Invalidate any relevant queries
       queryClient.invalidateQueries({ queryKey: ['taxReturns'] });
@@ -45,9 +48,9 @@ export function useCreateTaxReturn() {
 
 export function useStartBuildJob() {
   const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (returnId: number) => apiClient.startBuildJob(returnId),
+
+  return useMutation<unknown, Error, number>({
+    mutationFn: (returnId) => apiClient.startBuildJob(returnId),
     onSuccess: (_, returnId) => {
       // Invalidate status query to start polling
       queryClient.invalidateQueries({ queryKey: ['taxReturnStatus', returnId] });
@@ -57,7 +60,7 @@ export function useStartBuildJob() {
 
 // Artifacts
 export function useArtifacts(returnId: number) {
-  return useQuery({
+  return useQuery<ArtifactMetadata[]>({
     queryKey: ['artifacts', returnId],
     queryFn: () => apiClient.getArtifacts(returnId),
     enabled: !!returnId,
@@ -66,10 +69,13 @@ export function useArtifacts(returnId: number) {
 
 export function useCreateArtifact() {
   const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ returnId, data }: { returnId: number; data: CreateArtifactRequest }) =>
-      apiClient.createArtifact(returnId, data),
+
+  return useMutation<
+    ArtifactMetadata,
+    Error,
+    { returnId: number; data: CreateArtifactRequest }
+  >({
+    mutationFn: ({ returnId, data }) => apiClient.createArtifact(returnId, data),
     onSuccess: (_, { returnId }) => {
       queryClient.invalidateQueries({ queryKey: ['artifacts', returnId] });
     },
@@ -78,9 +84,13 @@ export function useCreateArtifact() {
 
 export function useUploadFile() {
   const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ returnId, artifactId, file }: { returnId: number; artifactId: number; file: File }) =>
+
+  return useMutation<
+    ArtifactMetadata,
+    Error,
+    { returnId: number; artifactId: number; file: File }
+  >({
+    mutationFn: ({ returnId, artifactId, file }) =>
       apiClient.uploadFile(returnId, artifactId, file),
     onSuccess: (_, { returnId }) => {
       queryClient.invalidateQueries({ queryKey: ['artifacts', returnId] });
